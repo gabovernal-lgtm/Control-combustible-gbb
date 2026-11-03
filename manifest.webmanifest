@@ -1,0 +1,9 @@
+{
+  "name": "Control de Combustible GBB",
+  "short_name": "Combustible GBB",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#101720",
+  "theme_color": "#101720",
+  "description": "Registro de combustible en faena, incluso sin conexión"
+}
