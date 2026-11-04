@@ -1,2 +1,2 @@
 // Sustituir únicamente la clave publicable (publishable/anon), nunca service_role.
-window.FUEL_CONFIG={url:"https://efqaofjxtinezehxwblg.supabase.co",publishableKey:"REEMPLAZAR_CON_CLAVE_PUBLICABLE"};
+window.FUEL_CONFIG={url:"https://efqaofjxtinezehxwblg.supabase.co",publishableKey:"sb_publishable_HpuuOo2x0j55f1EIcFRwcg_VxPy79rS"};
