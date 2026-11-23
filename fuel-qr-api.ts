@@ -29,7 +29,8 @@ Deno.serve(async(req:Request)=>{
   const {data:identity,error:authError}=await db.auth.getUser(auth.slice(7));
   if(authError||!identity.user)return response({error:'Tu sesión venció. Inicia sesión con conexión; tus cargas siguen guardadas.'},401);
   const uid=identity.user.id;
-  const {data:profile}=await db.from('profiles').select('*').eq('id',uid).single();
+  const {data:profile,error:profileError}=await db.from('profiles').select('*').eq('id',uid).single();
+  if(profileError)throw Error('No se pudo verificar el perfil en el servidor. Comunícate con el administrador.');
   if(!profile?.active)return response({error:'Usuario inactivo'},403);
   if(body.action==='account_requests'||body.action==='review_account_request'){
    if(profile.role!=='admin')return response({error:'Solo administrador'},403);
