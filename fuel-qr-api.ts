@@ -7,15 +7,39 @@ Deno.serve(async(req:Request)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers});
  if(req.method!=='POST')return response({error:'Método no permitido'},405);
  try{
+  const raw=await req.text();if(raw.length>32768)return response({error:'Solicitud demasiado extensa'},413);
+  const body=JSON.parse(raw);
+  const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false,autoRefreshToken:false}});
+  if(body.action==='request_account'){
+   if(raw.length>4096)return response({error:'Solicitud demasiado extensa'},413);
+   if(typeof body.name!=='string'||body.name.trim().length<2||body.name.length>120||typeof body.email!=='string'||body.email.length>254||!/^\S+@\S+\.\S+$/.test(body.email.trim())||typeof body.password!=='string'||body.password.length<10||body.password.length>128||!['receiver','driver'].includes(body.role))return response({error:'Completa nombre, correo, contraseña de 10 a 128 caracteres y perfil receptor o surtidor.'},400);
+   const email=body.email.trim().toLowerCase();
+   const hash=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
+   const {data:allowed,error:limitError}=await db.rpc('allow_fuel_account_request',{p_email_key:await hash(email),p_client_key:await hash(req.headers.get('x-forwarded-for')||req.headers.get('cf-connecting-ip')||'unknown')});
+   if(limitError)throw limitError;if(allowed!==true)return response({error:'Hay demasiados intentos de registro. Espera antes de volver a solicitar acceso.'},429);
+   const {data,error}=await db.auth.admin.createUser({email,password:body.password,email_confirm:true});
+   if(error)return response({error:'No se pudo crear la solicitud. Si ya tienes cuenta o una solicitud pendiente, ingresa con tu correo o comunícate con el administrador.'},400);
+   const {error:requestError}=await db.rpc('submit_fuel_account_request',{p_user_id:data.user.id,p_name:body.name.trim(),p_email:email,p_role:body.role});
+   if(requestError){await db.auth.admin.deleteUser(data.user.id);throw requestError;}
+   return response({ok:true,status:'pending',message:'Solicitud enviada. Tu cuenta está pendiente de aprobación del administrador. No puedes ingresar hasta que la apruebe.'});
+  }
+
   const auth=req.headers.get('authorization')||'';
   if(!auth.startsWith('Bearer '))return response({error:'Inicia sesión con conexión para sincronizar.'},401);
-  const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data:identity,error:authError}=await db.auth.getUser(auth.slice(7));
   if(authError||!identity.user)return response({error:'Tu sesión venció. Inicia sesión con conexión; tus cargas siguen guardadas.'},401);
   const uid=identity.user.id;
   const {data:profile}=await db.from('profiles').select('*').eq('id',uid).single();
   if(!profile?.active)return response({error:'Usuario inactivo'},403);
-  const body=await req.json();
+  if(body.action==='account_requests'||body.action==='review_account_request'){
+   if(profile.role!=='admin')return response({error:'Solo administrador'},403);
+   if(body.action==='account_requests'){
+    const {data,error}=await db.from('fuel_account_requests').select('id,user_id,full_name,email,requested_role,status,created_at,review_note').neq('status','approved').order('status').order('created_at').limit(500);if(error)throw error;return response({requests:data});
+   }
+   if(!uuid(body.id)||typeof body.approve!=='boolean'||!['receiver','driver'].includes(body.role)||typeof body.note!=='string'||body.note.length>500)throw Error('Revisión inválida');
+   const {data,error}=await db.rpc('review_fuel_account_request',{p_admin_id:uid,p_request_id:body.id,p_approve:body.approve,p_role:body.role,p_note:body.note});if(error)throw error;return response(data);
+  }
+
   if(body.action==='register_device'){
    if(profile.role!=='receiver')return response({error:'Solo receptor'},403);
    const {id,jwk}=body;
@@ -29,7 +53,7 @@ Deno.serve(async(req:Request)=>{
   if(body.action==='users'||body.action==='create_user'||body.action==='update_user'){
    if(profile.role!=='admin')return response({error:'Solo administrador'},403);
    if(body.action==='users'){
-    const {data,error}=await db.from('profiles').select('id,full_name,role,active').order('full_name');if(error)throw error;return response({users:data});
+    const {data,error}=await db.from('profiles').select('id,full_name,role,active').eq('access_status','approved').order('full_name');if(error)throw error;return response({users:data});
    }
    if(!['admin','driver','receiver'].includes(body.role)||typeof body.name!=='string'||body.name.trim().length<2||body.name.length>120)throw Error('Nombre y perfil inválidos');
    if(body.action==='create_user'){
@@ -40,6 +64,7 @@ Deno.serve(async(req:Request)=>{
     return response({ok:true});
    }
    if(!uuid(body.id)||typeof body.active!=='boolean')throw Error('Usuario inválido');
+   const {data:targetProfile}=await db.from('profiles').select('access_status').eq('id',body.id).single();if(targetProfile?.access_status&&targetProfile.access_status!=='approved')throw Error('Aprueba o rechaza esta cuenta en Solicitudes de acceso.');
    if(body.id===uid&&(body.role!=='admin'||!body.active))throw Error('No puedes quitarte tu propio acceso de administrador');
    const {error}=await db.from('profiles').update({full_name:body.name.trim(),role:body.role,active:body.active}).eq('id',body.id);if(error)throw error;return response({ok:true});
   }

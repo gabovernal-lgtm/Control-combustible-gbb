@@ -59,3 +59,11 @@ La lectura con cámaras de dos teléfonos físicos debe comprobarse con una prim
 Solo el administrador ve y descarga el historial, consulta conflictos o modifica registros y catálogos. El conductor solo registra cargas nuevas y escanea QR. El receptor solo genera su QR. Estas restricciones se aplican también en la base de datos.
 
 Si el surtidor detecta un error en una carga guardada, debe comunicarse con el administrador. No puede modificarla ni eliminarla; las correcciones administrativas quedan auditadas.
+
+## Solicitudes de cuenta y aprobación
+
+En la pantalla inicial, la persona pulsa Solicitar cuenta, completa nombre, correo, contraseña y perfil (Receptor o Conductor / camión surtidor), y envía su solicitud con internet. No recibe acceso operativo hasta la aprobación.
+
+El administrador entra por Camión surtidor y abre Administrar → Solicitudes de acceso. Puede revisar nombre y correo, ajustar el perfil, agregar una observación y Aprobar cuenta o Rechazar solicitud. La aprobación activa la cuenta con el correo y contraseña que la persona eligió. El rechazo mantiene bloqueado el acceso y muestra ese estado al intentar ingresar. Es posible reconsiderar una solicitud rechazada desde el mismo panel.
+
+Las contraseñas no se muestran al administrador. No se envían correos de aprobación ni se depende del límite de correos de recuperación. El solicitante consulta el resultado al iniciar sesión o a través del administrador. El acceso de administrador no se solicita desde el formulario público; solo lo asigna otro administrador. Verificar la identidad antes de aprobar: el registro no demuestra por sí solo que la persona es dueña del correo informado.
