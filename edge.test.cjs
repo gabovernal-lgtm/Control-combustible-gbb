@@ -10,11 +10,11 @@ async function fixture(role='driver'){
 }
 (async()=>{
  let t=await fixture();assert.equal((await t.call({action:'users'},false)).status,401);assert.equal((await t.call({action:'users'})).status,403);assert.equal((await t.call({action:'register_device'})).status,403);
- assert.equal((await t.call({action:'record',delivery:t.delivery})).status,200);
+ const missingQR=await t.call({action:'record',delivery:t.delivery});assert.equal(missingQR.status,400);assert.equal((await missingQR.json()).code,'QR_REQUIRED');
  let proof={qr:t.qr,scanned_at:new Date().toISOString()};assert.equal((await t.call({action:'claim',proof,delivery:t.delivery})).status,200);assert.equal(t.stats().rpcCount,1);
  t.duplicate();const duplicate=await t.call({action:'claim',proof,delivery:{...t.delivery,id:crypto.randomUUID()}});assert.equal(duplicate.status,409);assert.equal((await duplicate.json()).code,'QR_ALREADY_USED');assert.equal(t.stats().audits,1);
  const p=t.qr.split('.');const obj=core.parse(t.qr).payload;obj.n=crypto.randomUUID();p[1]=Buffer.from(JSON.stringify(obj)).toString('base64url');assert.equal((await t.call({action:'claim',proof:{...proof,qr:p.join('.')},delivery:t.delivery})).status,400);assert.equal(t.stats().rpcCount,2);
- t=await fixture('receiver');assert.equal((await t.call({action:'claim',proof,delivery:t.delivery})).status,403);assert.equal((await t.call({action:'create_user'})).status,403);assert.equal((await t.call({action:'record',delivery:t.delivery})).status,403);
+ t=await fixture('receiver');assert.equal((await t.call({action:'claim',proof,delivery:t.delivery})).status,403);assert.equal((await t.call({action:'create_user'})).status,403);assert.equal((await t.call({action:'record',delivery:t.delivery})).status,400);
  t=await fixture('admin');assert.equal((await t.call({action:'create_user',name:'Test',email:'person@example.invalid',password:'weak',role:'driver'})).status,400);assert.equal(t.stats().created,0);
  assert.equal((await t.call({action:'update_user',id:t.uid,name:'Test',role:'receiver',active:true})).status,400);
  assert.equal((await t.call({action:'create_user',name:'Test',email:'person@example.invalid',password:'abc123',role:'receiver'})).status,200);assert.equal(t.stats().created,1);

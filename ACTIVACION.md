@@ -38,7 +38,7 @@ No compartir contraseñas en capturas o chats. Las cuentas existentes continúan
 
 El QR identifica al receptor. El conductor lo asocia a los litros y equipo; el receptor no firma esos datos desde su pantalla. Generar un nuevo QR no revoca una fotografía del anterior mientras todos están sin conexión. Dos conductores desconectados pueden leer la misma copia: el primer uso sincronizado queda registrado y el otro aparece como conflicto, sin validarse automáticamente. El administrador lo ve en Administrar → Conflictos QR. La carga en conflicto permanece en el celular del conductor para revisión.
 
-Durante la transición se permite guardar una carga sin QR, identificada como sin validación por QR.
+El QR es obligatorio para confirmar cualquier carga nueva. El botón de escaneo está después de las observaciones y antes de Confirmar carga. Sin QR válido, Confirmar carga permanece deshabilitado y el servidor rechaza el registro.
 
 ## Actualización
 

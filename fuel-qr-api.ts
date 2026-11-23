@@ -69,15 +69,7 @@ Deno.serve(async(req:Request)=>{
    if(body.id===uid&&(body.role!=='admin'||!body.active))throw Error('No puedes quitarte tu propio acceso de administrador');
    const {error}=await db.from('profiles').update({full_name:body.name.trim(),role:body.role,active:body.active}).eq('id',body.id);if(error)throw error;return response({ok:true});
   }
-  if(body.action==='record'){
-   if(!['admin','driver'].includes(profile.role))return response({error:'Solo conductor o administrador'},403);
-   const x=body.delivery;
-   if(!x||!uuid(x.id)||!uuid(x.truck_id)||(x.equipment_id&&!uuid(x.equipment_id))||(!x.equipment_id&&!(typeof x.other_equipment==='string'&&x.other_equipment.trim()))||!Number.isFinite(Number(x.liters))||Number(x.liters)<=0||Number(x.liters)>30000||!['TA','TB'].includes(x.shift)||!Number.isFinite(Date.parse(x.delivered_at))||Date.parse(x.delivered_at)>Date.now()+300000)throw Error('Datos de carga inválidos. Comunícate con el administrador si necesitas corregir una carga guardada.');
-   const row={id:x.id,driver_id:uid,truck_id:x.truck_id,equipment_id:x.equipment_id||null,other_equipment:x.other_equipment||null,liters:Number(x.liters),shift:x.shift,delivered_at:x.delivered_at,notes:String(x.notes||'').slice(0,2000),receiver_id:null,receipt_status:'not_requested'};
-   const {data:existing,error:lookupError}=await db.from('fuel_deliveries').select('*').eq('id',row.id).maybeSingle();if(lookupError)throw lookupError;
-   if(existing){const same=existing.driver_id===uid&&existing.qr_token_id==null&&existing.receiver_id==null&&existing.truck_id===row.truck_id&&existing.equipment_id===row.equipment_id&&existing.other_equipment===row.other_equipment&&Number(existing.liters)===row.liters&&existing.shift===row.shift&&Date.parse(existing.delivered_at)===Date.parse(row.delivered_at)&&existing.notes===row.notes;if(!same)throw Error('La carga ya existe con datos distintos. Comunícate con el administrador.');return response({ok:true,idempotent:true});}
-   const {error}=await db.from('fuel_deliveries').insert(row);if(error)throw error;return response({ok:true});
-  }
+  if(body.action==='record')return response({error:'Debes escanear un QR válido del receptor para registrar la entrega.',code:'QR_REQUIRED'},400);
   if(body.action!=='claim'||!['admin','driver'].includes(profile.role))return response({error:'Acción no autorizada'},403);
   const {proof,delivery}=body;
   if(typeof proof?.qr!=='string'||proof.qr.length>2500||!delivery||!uuid(delivery.id))throw Error('QR_INVALID');
