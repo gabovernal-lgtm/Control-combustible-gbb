@@ -16,8 +16,8 @@ No compartir contraseñas en capturas o chats. Las cuentas existentes continúan
 
 | Perfil | Acceso inicial | Funciones |
 |---|---|---|
-| Receptor | Receptor de combustible | Activar su celular, generar un QR nuevo por carga sin conexión y consultar sus recepciones sincronizadas. No registra litros ni administra usuarios. |
-| Conductor | Camión surtidor | Seleccionar camión, registrar cargas, escanear QR, guardar sin conexión, sincronizar y consultar/descargar sus registros. No crea usuarios ni modifica catálogos. |
+| Receptor | Receptor de combustible | Activar su celular, generar un QR nuevo por carga sin conexión sin acceso al historial. No registra litros ni administra usuarios. |
+| Conductor | Camión surtidor | Seleccionar camión, registrar cargas, escanear QR, guardar sin conexión, sincronizar sin acceso al historial ni a descargas. No crea usuarios ni modifica catálogos. |
 | Administrador | Camión surtidor | Funciones del conductor, reportes generales, camiones, equipos, categorías, correcciones auditadas, usuarios/perfiles y consulta de conflictos QR. |
 
 ## Preparación antes de salir sin internet
@@ -53,3 +53,9 @@ Si la app instalada avisa que hay una nueva versión, finalizar la carga en curs
 - Elección de perfil y apertura offline usando el acceso previamente guardado.
 
 La lectura con cámaras de dos teléfonos físicos debe comprobarse con una primera entrega controlada.
+
+## Historial y modificaciones
+
+Solo el administrador ve y descarga el historial, consulta conflictos o modifica registros y catálogos. El conductor solo registra cargas nuevas y escanea QR. El receptor solo genera su QR. Estas restricciones se aplican también en la base de datos.
+
+Si el surtidor detecta un error en una carga guardada, debe comunicarse con el administrador. No puede modificarla ni eliminarla; las correcciones administrativas quedan auditadas.

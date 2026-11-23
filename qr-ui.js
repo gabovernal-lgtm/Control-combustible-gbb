@@ -27,13 +27,13 @@ window.GBBReceiverUI=(()=>{
   if($('driverQRCard'))return;
   const select=$('receiver');const label=select.previousElementSibling;label.classList.add('hidden');select.classList.add('hidden');
   const card=document.createElement('div');card.id='driverQRCard';card.className='qr-card';card.innerHTML='<h2>Receptor del combustible</h2><p>Escanea el QR de un solo uso que muestra el receptor. Funciona sin internet con los receptores previamente actualizados.</p><button id="scanReceiverQR" type="button">Escanear QR del receptor</button><button id="refreshReceiverDirectory" type="button" class="secondary">Actualizar receptores</button><button id="clearReceiverQR" type="button" class="secondary hidden">Quitar receptor</button><p id="qrStatus" role="status">Sin receptor identificado. Puedes guardar sin validación durante la transición.</p>';
-  select.after(card);
+  select.after(card);if(ctx.profile.role==='driver'){const note=document.createElement('p');note.className='muted';note.textContent='Si una carga guardada tiene un error, comunícate con el administrador. Solo el administrador puede revisar el historial y corregir o eliminar registros.';card.appendChild(note);}
   $('scanReceiverQR').onclick=scan;$('clearReceiverQR').onclick=()=>{proof=null;state('Sin receptor identificado.');$('clearReceiverQR').classList.add('hidden')};
   $('refreshReceiverDirectory').onclick=async()=>{try{if(!navigator.onLine)throw Error('Conecta este celular a internet para actualizar.');await refresh(true);state(receivers.length+' receptores y '+devices.filter(x=>x.active).length+' celulares registrados actualizados.')}catch(e){state(e.message)}};
  }
  function receiverUI(){
   if($('receiverQRCard'))return;
-  const card=document.createElement('div');card.className='qr-card';card.id='receiverQRCard';card.innerHTML='<h2>Mi QR de recepción</h2><p id="receiverQRName"></p><p>Genera un QR nuevo para cada entrega. No necesitas internet después de activar este celular.</p><button id="generateReceiverQR" type="button">Generar QR para una carga</button><div id="receiverQR" class="qr-code hidden"></div><p id="receiverQRText"></p><button id="copyReceiverQR" type="button" class="secondary hidden">Copiar código</button><p id="receiverQRStatus" role="status"></p><p class="muted">El QR identifica al receptor; el conductor lo vincula a los litros y equipo. La carga aparece aquí después de sincronizar el conductor. Generar un QR nuevo no revoca una copia anterior sin conexión.</p>';
+  const card=document.createElement('div');card.className='qr-card';card.id='receiverQRCard';card.innerHTML='<h2>Mi QR de recepción</h2><p id="receiverQRName"></p><p>Genera un QR nuevo para cada entrega. No necesitas internet después de activar este celular.</p><button id="generateReceiverQR" type="button">Generar QR para una carga</button><div id="receiverQR" class="qr-code hidden"></div><p id="receiverQRText"></p><button id="copyReceiverQR" type="button" class="secondary hidden">Copiar código</button><p id="receiverQRStatus" role="status"></p><p class="muted">El QR identifica al receptor; el conductor lo vincula a los litros y equipo. El historial de cargas solo está disponible para el administrador. Generar un QR nuevo no revoca una copia anterior sin conexión.</p>';
   $('receipt').prepend(card);$('receiverQRName').textContent=ctx.profile.full_name;$('generateReceiverQR').onclick=generate;
   $('copyReceiverQR').onclick=async()=>{try{await navigator.clipboard.writeText(currentQR);$('receiverQRStatus').textContent='Código copiado.'}catch{$('receiverQRStatus').textContent='No se pudo copiar. Muestra el QR en pantalla.'}};
   register().then(()=>{$('receiverQRStatus').textContent='Celular activado. Ya puedes generar QR sin conexión.'}).catch(e=>{$('receiverQRStatus').textContent=e.message});
@@ -52,7 +52,7 @@ window.GBBReceiverUI=(()=>{
   if(ctx.profile.role==='receiver')receiverUI();else{driverUI();await refresh();}
   if(ctx.profile.role==='admin')adminUI();
  }
- async function sync(item){await api({action:'claim',delivery:item,proof:item._receiptProof})}
+ async function sync(item){await api({action:item._receiptProof?'claim':'record',delivery:item,proof:item._receiptProof})}
  function getProof(){return proof?{...proof}:null}
  function clear(){proof=null;if($('qrStatus'))state('Carga guardada. Escanea un QR nuevo para la siguiente entrega.');$('clearReceiverQR')?.classList.add('hidden')}
  return {init,getProof,clear,sync,refresh,loadUsers:users};

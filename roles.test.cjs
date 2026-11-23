@@ -12,7 +12,7 @@ async function setup(role,online=true){
 (async()=>{
  let t=await setup('receiver');assert.equal(t.stats().sessionReads,0);assert.equal(t.el('entryChoice').classList.contains('hidden'),false);await t.el('chooseSupplier').onclick();assert.equal(t.stats().signouts,1);assert.match(t.el('entryChoiceStatus').textContent,/no tiene el perfil/);assert.equal(t.stats().initialized,0);
  t=await setup('driver');await t.el('chooseReceiver').onclick();assert.equal(t.stats().signouts,1);
- for(const role of ['driver','admin','receiver']){t=await setup(role);await t.el(role==='receiver'?'chooseReceiver':'chooseSupplier').onclick();assert.equal(t.stats().initialized,1,role);assert.equal(t.el('app').classList.contains('hidden'),false);assert.equal(t.el('showAdmin').classList.contains('hidden'),role!=='admin');}
+ for(const role of ['driver','admin','receiver']){t=await setup(role);await t.el(role==='receiver'?'chooseReceiver':'chooseSupplier').onclick();assert.equal(t.stats().initialized,1,role);assert.equal(t.el('app').classList.contains('hidden'),false);assert.equal(t.el('showAdmin').classList.contains('hidden'),role!=='admin');assert.equal(t.el('showHistory').classList.contains('hidden'),role!=='admin');}
  t=await setup('receiver',false);await t.el('chooseReceiver').onclick();assert.equal(t.stats().sessionReads,0);assert.equal(t.stats().initialized,1);
  console.log('PASS: entry selection, wrong-role sign-out, driver/admin/receiver routing and offline receiver boot without auth requests');
 })().catch(e=>{console.error(e);process.exitCode=1});
