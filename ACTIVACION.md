@@ -8,7 +8,7 @@ Al abrir se elige **Receptor de combustible** o **Camión surtidor**. El perfil 
 
 1. Entrar con una cuenta administradora por Camión surtidor.
 2. Abrir Administrar → Usuarios y perfiles.
-3. Completar nombre, correo, contraseña inicial de al menos 10 caracteres y perfil.
+3. Completar nombre, correo, contraseña inicial de al menos 6 caracteres y perfil.
 4. Pulsar Crear usuario. El usuario entra con ese correo y contraseña; esta creación no envía correo de recuperación.
 5. Para modificar el perfil o desactivar la cuenta: Actualizar usuarios → Editar perfil → Guardar perfil. El administrador no puede quitarse su propio acceso desde esta pantalla.
 
