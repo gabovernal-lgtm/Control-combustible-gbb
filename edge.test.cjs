@@ -17,6 +17,6 @@ async function fixture(role='driver'){
  t=await fixture('receiver');assert.equal((await t.call({action:'claim',proof,delivery:t.delivery})).status,403);assert.equal((await t.call({action:'create_user'})).status,403);assert.equal((await t.call({action:'record',delivery:t.delivery})).status,403);
  t=await fixture('admin');assert.equal((await t.call({action:'create_user',name:'Test',email:'person@example.invalid',password:'weak',role:'driver'})).status,400);assert.equal(t.stats().created,0);
  assert.equal((await t.call({action:'update_user',id:t.uid,name:'Test',role:'receiver',active:true})).status,400);
- assert.equal((await t.call({action:'create_user',name:'Test',email:'person@example.invalid',password:'generated-test-password',role:'receiver'})).status,200);assert.equal(t.stats().created,1);
+ assert.equal((await t.call({action:'create_user',name:'Test',email:'person@example.invalid',password:'abc123',role:'receiver'})).status,200);assert.equal(t.stats().created,1);
  console.log('PASS: API authentication, role restrictions, signed claim, replay conflict audit, tamper rejection and administrator account safeguards');
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -1,7 +1,7 @@
 {
   "name": "control-combustible-gbb",
   "private": true,
-  "version": "20.0.0",
+  "version": "21.0.0",
   "engines": {
     "node": ">=24"
   },

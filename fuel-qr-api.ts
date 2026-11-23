@@ -12,7 +12,7 @@ Deno.serve(async(req:Request)=>{
   const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false,autoRefreshToken:false}});
   if(body.action==='request_account'){
    if(raw.length>4096)return response({error:'Solicitud demasiado extensa'},413);
-   if(typeof body.name!=='string'||body.name.trim().length<2||body.name.length>120||typeof body.email!=='string'||body.email.length>254||!/^\S+@\S+\.\S+$/.test(body.email.trim())||typeof body.password!=='string'||body.password.length<10||body.password.length>128||!['receiver','driver'].includes(body.role))return response({error:'Completa nombre, correo, contraseña de 10 a 128 caracteres y perfil receptor o surtidor.'},400);
+   if(typeof body.name!=='string'||body.name.trim().length<2||body.name.length>120||typeof body.email!=='string'||body.email.length>254||!/^\S+@\S+\.\S+$/.test(body.email.trim())||typeof body.password!=='string'||body.password.length<6||body.password.length>128||!['receiver','driver'].includes(body.role))return response({error:'Completa nombre, correo, contraseña de 6 a 128 caracteres y perfil receptor o surtidor.'},400);
    const email=body.email.trim().toLowerCase();
    const hash=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
    const {data:allowed,error:limitError}=await db.rpc('allow_fuel_account_request',{p_email_key:await hash(email),p_client_key:await hash(req.headers.get('x-forwarded-for')||req.headers.get('cf-connecting-ip')||'unknown')});
@@ -57,7 +57,7 @@ Deno.serve(async(req:Request)=>{
    }
    if(!['admin','driver','receiver'].includes(body.role)||typeof body.name!=='string'||body.name.trim().length<2||body.name.length>120)throw Error('Nombre y perfil inválidos');
    if(body.action==='create_user'){
-    if(typeof body.email!=='string'||!/^\S+@\S+\.\S+$/.test(body.email)||typeof body.password!=='string'||body.password.length<10||body.password.length>128)throw Error('Ingresa correo válido y contraseña de 10 a 128 caracteres');
+    if(typeof body.email!=='string'||!/^\S+@\S+\.\S+$/.test(body.email)||typeof body.password!=='string'||body.password.length<6||body.password.length>128)throw Error('Ingresa correo válido y contraseña de 6 a 128 caracteres');
     const {data,error}=await db.auth.admin.createUser({email:body.email.trim().toLowerCase(),password:body.password,email_confirm:true});if(error)throw error;
     const {error:profileError}=await db.from('profiles').insert({id:data.user.id,full_name:body.name.trim(),role:body.role,active:true});
     if(profileError){await db.auth.admin.deleteUser(data.user.id);throw profileError;}

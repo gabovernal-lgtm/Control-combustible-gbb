@@ -7,6 +7,7 @@ function setup({role='admin',active=true,allowed=true,submitError=false}={}){let
 }
 (async()=>{const request={action:'request_account',name:'Prueba Registro',email:'test@example.invalid',password:'sample-test-password',role:'receiver'};
  let t=setup();let res=await t.call(request);assert.equal(res.status,200);assert.equal((await res.json()).status,'pending');assert.equal(t.stats().created,1);assert.equal(t.stats().calls[1].name,'submit_fuel_account_request');assert.equal(JSON.stringify(t.stats().calls).includes(request.password),false,'password is never saved in application tables');
+ t=setup();assert.equal((await t.call({...request,password:'abc123'})).status,200);
  t=setup();assert.equal((await t.call({...request,role:'admin'})).status,400);assert.equal(t.stats().created,0);
  t=setup();assert.equal((await t.call({...request,password:'short'})).status,400);assert.equal(t.stats().created,0);
  t=setup({allowed:false});assert.equal((await t.call(request)).status,429);assert.equal(t.stats().created,0);
