@@ -1,0 +1,8 @@
+{
+  "name": "control-combustible-gbb",
+  "private": true,
+  "version": "18.0.0",
+  "engines": { "node": ">=24" },
+  "scripts": { "test": "node qr.test.cjs && node roles.test.cjs && node edge.test.cjs" },
+  "devDependencies": { "sharp": "0.35.5" }
+}
